@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>RiceMerchant</title>
+        <link rel="shortcut icon" type="image/png" th:href="@{/images/logo.png}"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <style>
+           body {
+              font-family: "Source Sans Pro", "Roboto", "helvetica neue", helvetica, arial, sans-serif;
+              font-size: 15px;
+              text-align: center;
+              width: 50%;
+              margin-top: 2px;
+           }
+           #deliveryslip {
+              border-top: 1px solid #000000;
+              border-bottom: 1px solid #000000;
+              padding-bottom: 5px;
+           }
+           table {
+              counter-reset: rowNumber;
+              border-collapse: collapse;
+              margin-left: auto;
+              margin-right: auto;
+           }          
+           th {
+              padding: 10px;
+              background-color: #663399;
+              color: white;
+           }
+           table tbody tr {
+              counter-increment: rowNumber;
+           }
+           table tbody tr td:first-child::before {
+              content: counter(rowNumber);
+              min-width: 1em;
+              margin-right: 0.5em;
+           }
+           td {
+              padding: 10px;
+           }
+           #total {
+              text-align: right;
+              border-top: 1px solid #000000;
+              border-bottom: 1px solid #000000;
+           }
+           hr {
+              border-top: 1px solid #000000;
+           }
+           @media print and (width: 21cm) and (height: 29.7cm) {
+               @page {
+                  margin: 3cm;
+               }
+           }
+           @media print and (width: 8.5in) and (height: 11in) {
+                @page {
+                  margin: 1in;
+                }
+           }
+           @page {
+                size: A4 landscape;
+           }
+        </style>
+    </head>
+    <body>
+        <h2>Sandhiya Traders</h2>
+        <p>Thiru Vekaa Road, Karur, Tamil Nadu - 639001</p>
+        <p><b>Phone: 098434 53898</b></p>
+        <div id="deliveryslip">
+            <p>
+               Date: <span th:text="${date}"></span>&nbsp;
+               <span th:text="${time}"></span>
+            </p>
+            <b>**DELIVERY SLIP**</b>
+        </div>
+        <table id="carttable">
+          <thead>
+             <tr style="font-weight: bold; font-size: 16px;">
+                <td>S.No</td>
+                <td id="selectbrandname">Brand Name</td>
+                <td>Quantity</td>
+                <td>Unit Price</td>
+                <td>Total Price</td>
+                <td style="display: none;">Tax Amount</td>
+             </tr>
+          </thead>
+          <tbody>
+              <tr th:each="row : ${cartlist}">
+                    <td></td>
+                    <td id="selectbrandname" th:text="${row.brandName}"></td>
+                    <td th:text="${row.quantity}"></td>
+                    <td th:text="${row.unitPrice}"></td>
+                    <td class="totalprice" th:text="${row.totalPrice}"></td>
+                    <td style="display: none;" class="taxAmount" th:text="${row.TaxAmount}"></td>
+              </tr>
+          </tbody>
+       </table>
+       <div id="total">
+         <p>
+          <b>
+            <span>Net Amount : </span>
+            <span id="netAmount"></span>
+          </b>
+         </p>
+         <p>
+          <b>
+            <span>SGST : </span>
+            <span id="sgst"></span>
+          </b>
+         </p>
+         <p>
+          <b>
+            <span>CGST : </span>
+            <span id="cgst"></span>
+          </b>
+         </p>
+         <p>
+         <hr>
+          <b>
+            <span>Total Amount : </span>
+            <span id="totalAmount"></span>
+          </b>
+         </p>             
+       </div>
+       <p><b>*THANK YOU VISIT AGAIN*</b></p>
+    </body>
+    <script th:inline="javascript">
+       var total = 0.00;
+       var taxTotal = 0.00;
+       var taxAmount = 0.00;
+       (function() {
+          window.print();
+          setTimeout(function() { 
+             if(confirm("Confirm Purchase?")) window.location.href=window.location.protocol+"//"+window.location.host+"/ricemerchant/stocks/customerpurchase/emptycart/true";
+             else window.location.href=window.location.protocol+"//"+window.location.host+"/ricemerchant/stocks/customerpurchase";
+          }, 100);
+          
+          $('td').each(function(){
+                if($(this).hasClass('totalprice'))
+                   total+= parseFloat($(this).text());
+          });
+          document.getElementById("netAmount").innerText=total.toFixed(2);
+          $('td').each(function(){
+                if($(this).hasClass('taxAmount'))
+                   taxTotal+= parseFloat($(this).text());
+           });
+           document.getElementById("cgst").innerText = (taxTotal/2).toFixed(2);
+           document.getElementById("sgst").innerText = (taxTotal/2).toFixed(2);
+           document.getElementById("totalAmount").innerText=(total+taxTotal).toFixed(2);
+       }());
+    </script>
+</html>

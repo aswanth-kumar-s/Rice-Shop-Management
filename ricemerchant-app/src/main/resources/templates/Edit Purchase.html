@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>RiceMerchant</title>
+        <link rel="shortcut icon" type="image/png" th:href="@{/images/logo.png}"/>
+        <style>
+            form {
+              margin-top: 5px;
+              padding: 20px;
+            }
+            input[type="text"], input[type="number"] {
+              font-size: 15px;
+              width: 100%;
+              padding: 12px 20px;
+              margin: 8px 0;
+              display: inline-block;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              box-sizing: border-box;
+            }
+            span {
+              color: red;
+            }
+            button {
+              font-size: 15px;
+              background-color: #004d4d;
+              color: white;
+              padding: 14px 20px;
+              margin: 8px 0;
+              border: none;
+              border-radius: 4px;
+              cursor: pointer;
+            }
+            button:hover {
+              background-color: blue;
+            }
+            button:disabled,
+                 button[disabled]{
+                 border: 1px solid #999999;
+                 background-color: #cccccc;
+                 color: #666666;
+            }
+        </style>
+    </head>
+    <body>
+        <div th:replace="/Navigation Bar :: navigationbar"></div>
+        <form th:action="@{/ricemerchant/stocks/addstocks}" th:object="${addstock}" method="POST">
+           <input type="hidden" name="id" th:value="${brand.id}"><br>
+           <label for="brandname">Brand Name:</label><br>
+           <input type="text" name="brandname" th:value="${brand.brandname}" disabled><br><br>
+           <label for="stocks">Stocks:</label><br>
+           <input type="number" name="stocks" min="0" required><br>
+           <button disabled>Add</button>
+        </form>
+    </body>
+    <script th:inline="javascript">
+        $(document).ready(function() {
+                    $('form').on('input change', function() {
+                            $('button').attr('disabled', false);
+                    });
+        })
+    </script>
+</html>

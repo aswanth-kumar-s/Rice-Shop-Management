@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>RiceMerchant</title>
+        <link rel="shortcut icon" type="image/png" th:href="@{/images/logo.png}"/>
+        <style>
+            form {
+              margin-top: 5px;
+              padding: 20px;
+            }
+            select, input[type="text"], .inputnumber {
+              font-size: 15px;
+              width: 100%;
+              padding: 12px 20px;
+              margin: 8px 0;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              box-sizing: border-box;
+            }
+            input[type="date"] {
+              font-family: "Source Sans Pro", "Roboto", "helvetica neue", helvetica, arial, sans-serif;
+              font-size: 15px;
+              padding: 12px 20px;
+              margin: 8px 0;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              box-sizing: border-box;
+            }
+            #customduedate {
+              font-size: 15px;
+              padding: 12px 20px;
+              margin: 8px 0;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              box-sizing: border-box;
+            }
+            option {
+              font-size: 18px;
+            }
+            span {
+              color: blue;
+            }
+            #dateerror, #errortext {
+              color: red;
+            }
+            button, input[type="button"] {
+              font-size: 15px;
+              background-color: #004d4d;
+              color: white;
+              padding: 14px 20px;
+              margin: 8px 0;
+              border: none;
+              border-radius: 4px;
+              cursor: pointer;
+            }
+            button:hover, input[type="button"]:hover {
+              background-color: orange;
+            }
+        </style>
+    </head>
+    <body>
+        <div th:replace="/Navigation Bar :: navigationbar"></div>
+        <form method="POST" onsubmit="return onSubmit()" th:action="@{~/ricemerchant/stocks/registerstocks/save}">
+           <label for="dateofpurchase" required>Date of Purchase:</label><br>
+           <input id="dateofpurchase" type="date" name="dateofpurchase" onchange="onChangeDate()" required><br><br>
+           <label for="brandname">Brand name:</label><br>
+           <select id="brandname" name="brandname" onchange="brandnameOnChange()" required>
+               <option disabled selected></option>
+               <option th:each="row: ${brandslist}" th:text="${row}" th:selected="(${brandname}==${row})"></option>
+           </select><br><br>
+           <label for="dateofdelivery" required>Date of Delivery:</label><br>
+           <input id="dateofdelivery" type="date" name="dateofdelivery" onchange="onChangeDate(); setDueDate()" required><br>
+           <span id="dateerror"></span><br><br>
+           <label for="settlementperiod">Settlement Period:</label><br>
+           <input id="settlementperiodvalue" name="settlementperiodvalue" style="display: none;" onchange="setDueDate();">
+           <div>
+               <input class="settlementperiod-button" type="button" value="30">
+               <input class="settlementperiod-button" type="button" value="60">
+               <input class="settlementperiod-button" type="button" value="90">
+               <input type="number" id="customduedate" placeholder="Custom Due Date" min="0" onchange="setCustomDue(this.value);">
+               &nbsp;&nbsp;Due Date: <span id="duedate"></span><br>
+               <span id="errortext"></span><br><br>
+           </div>
+           <label for="quantity">Quantity:</label><br>
+           <input id="quantity" class="inputnumber" type="number" name="quantity" min="1" required><br><br>
+           <label for="riceamount" required>Rice Amount:</label><br>
+           <input class="inputnumber" type="number" id="riceamount" name="riceamount" onchange="onChangeAmount()" required><br><br>
+           <label for="miscellaneousamount">Miscellaneous Amount:</label><br>
+           <input class="inputnumber" type="number" id="miscellaneousamount" name="miscellaneousamount" onchange="onChangeAmount()" required><br><br>
+           Total Amount : <span id="totalamount" name="totalamount"></span><br><br>
+           <button>Register</button>
+        </form>
+    </body>
+    <script th:inline="javascript">
+        function onChangeDate() {
+          if(document.getElementById("dateofpurchase").value!="" && document.getElementById("dateofdelivery").value!="" && document.getElementById("dateofpurchase").value>document.getElementById("dateofdelivery").value) {
+            document.getElementById("dateofdelivery").value="";
+            document.getElementById("dateerror").innerHTML="Date of delivery must be greater than date of purchase";
+          }
+          else document.getElementById("dateerror").innerHTML="";
+        }
+
+        let buttons = document.querySelectorAll(".settlementperiod-button");
+        document.addEventListener("click", function(event){
+           if(event.target.classList.contains("settlementperiod-button")){
+                 buttons.forEach(function(button){
+                     button.style['background-color'] = '#004d4d';
+                 });
+                 event.target.style['background-color'] = 'blue';
+		         document.getElementById("customduedate").value="";
+		         document.getElementById("settlementperiodvalue").value=event.target.value;
+		         setDueDate(event.target.value);
+           }
+        });
+        
+        function setCustomDue(value) {
+           let buttons = document.querySelectorAll(".settlementperiod-button");
+           buttons.forEach(function(button){
+                     button.style['background-color'] = '#004d4d';
+           });
+		   document.getElementById("settlementperiodvalue").value=value;
+		   setDueDate(value);
+        }
+
+        function setDueDate() {
+           var dateOfDelivery=new Date(document.getElementById("dateofdelivery").value);
+           var settlementPeriodValue=Number(document.getElementById("settlementperiodvalue").value);
+           if(dateOfDelivery!="" && settlementPeriodValue!="") {
+		       var dueDate=new Date(dateOfDelivery.setTime(dateOfDelivery.getTime()+(settlementPeriodValue*24*60*60*1000)));
+		       dueDate.setDate(dueDate.getDate()); 
+		       var month = "0"+(dueDate.getMonth()+1);
+		       var date = "0"+dueDate.getDate();
+		       month = month.slice(-2);
+		       date = date.slice(-2);
+		       var date = date +"/"+month +"/"+dueDate.getFullYear();
+		       document.getElementById("duedate").innerHTML=date;
+		   }
+        }
+
+        function onChangeAmount() {
+            if(document.getElementById("riceamount").value!="" && document.getElementById("miscellaneousamount").value!="") document.getElementById("totalamount").innerText=(Number(document.getElementById("riceamount").value)+Number(document.getElementById("miscellaneousamount").value)).toFixed(2);
+        }
+
+        function onSubmit(n) 
+        {
+          if(document.getElementById("settlementperiodvalue").value=="") {
+            document.getElementById("errortext").innerHTML="Enter Settlement Period Value";
+            return false;
+          }
+        }
+    </script>
+</html>

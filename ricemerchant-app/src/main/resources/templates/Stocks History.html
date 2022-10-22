@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>RiceMerchant</title>
+        <link rel="shortcut icon" type="image/png" th:href="@{/images/logo.png}"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <style>
+           table {
+              counter-reset: rowNumber;
+              width: 100%;
+              padding-top: 10px;
+              table-layout: fixed;
+           }         
+           th {
+              text-align: center;
+              padding: 12px;
+              background-color: #702963;
+              color: white;
+           }
+           table tbody tr {
+              counter-increment: rowNumber;
+           }
+           table tbody tr td:first-child::before {
+              content: counter(rowNumber);
+              min-width: 1em;
+              margin-right: 0.5em;
+           }
+           td {
+              padding: 10px;
+              text-align: center;              
+           }
+           td a {
+              color: blue;
+           }
+           td a:hover {
+              color: black;
+           }
+           td a span {
+              display: inline-block;
+           }
+        </style>
+    </head>
+    <body>
+        <div th:replace="/Navigation Bar :: navigationbar"></div>
+        <table id="stocksHistoryTable">
+          <thead>
+             <tr>
+                <th>S.No</th>
+                <th>Date of Purchase</th>
+                <th>Brand Name</th>
+                <th>Date of Delivery</th>
+                <th>Quantity</th>
+                <th>Rice Amount</th>
+                <th>Miscellaneous Amount</th>
+                <th>Total Amount</th>
+                <th style="display: none">Settlement Status</th>
+                <th>Due Date</th>
+                <th>Action</td>
+             </tr>
+          </thead>
+          <tbody>
+              <tr th:each="row : ${stockHistoryList}">
+                    <td></td>
+                    <td th:text="${row.dateOfPurchase}"></td>
+                    <td th:text="${row.brandName}"></td>
+                    <td th:text="${row.dateOfDelivery}"></td>
+                    <td th:text="${row.quantity}"></td>
+                    <td th:text="${row.riceAmount}"></td>
+                    <td th:text="${row.miscellaneousAmount}"></td>
+                    <td th:text="${row.totalAmount}"></td>
+                    <td style="display: none" th:text="${row.settlementStatus}"></td>
+                    <td th:text="${row.dueDate}"></td>
+                    <td>
+                        <a th:href="@{/ricemerchant/stocks/addsettlement/{id}(id=${row.stockHistoryId})}"><span>Add Settlement</span></a> |
+                        <a th:href="@{/ricemerchant/stocks/stockhistoryupdate/{id}(id=${row.stockHistoryId})}"><span>Edit</span></a> |
+                        <a th:href="@{/ricemerchant/stocks/stockhistorydelete/{id}(id=${row.stockHistoryId})}"><span>Delete</span></a> 
+                    </td>
+              </tr>
+          </tbody>
+       </table>
+       <center>
+          <p id="noresults" style="color: red; font-size: 15px;">--- No Data ---</p>
+       </center>
+    </body>
+    <script th:inline="javascript">
+       window.onload = function() {
+           var table = document.getElementById("stocksHistoryTable");
+		   for(var i=1, row; row = table.rows[i]; i++) {
+			   if(row.cells[8].innerText==="true") {
+			      row.style.backgroundColor="#C1E1C1";
+			      row.cells[9].innerHTML="";
+			   }
+			   if(row.cells[8].innerText==="false") {
+			      row.style.backgroundColor="#FFCCCB";
+			      const time = Math.abs(new Date(row.cells[9].innerText)-new Date());
+                  const days = Math.ceil(time/(1000*60*60*24));
+			      row.cells[9].innerHTML="Due in "+days+" days";
+			   }
+		 }
+		 if(table.rows.length > 1)
+	        document.getElementById("noresults").innerHTML="-- End of results --";
+	     else
+	        table.style.visibility="hidden";
+       }
+    </script>
+</html>

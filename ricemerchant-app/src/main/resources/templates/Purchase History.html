@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>RiceMerchant</title>
+        <link rel="shortcut icon" type="image/png" th:href="@{/images/logo.png}"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <style>
+           table {
+              width: 100%;
+              padding-top: 10px;
+           }
+           tr:nth-child(odd){
+              background-color: #f2f2f2;
+           }  
+           tr:nth-child(even){
+              background-color: #c2adeb;
+           }           
+           th {
+              text-align: center;
+              padding: 12px;
+              background-color: #663399;
+              color: white;
+           }
+           td {
+              padding: 10px;
+              text-align: center;
+           }
+           td a {
+              color: blue;
+           }
+           td a:hover {
+              color: black;
+           }
+           td a span {
+              display: inline-block;
+           }
+           .nobackgroundcolor {
+              background-color: white;
+           }
+        </style>
+    </head>
+    <body>
+        <div th:replace="/Navigation Bar :: navigationbar"></div>
+        <table id="historytable">
+          <thead>
+             <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th id="selectbrandname">Brand Name</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total Price</th>
+                <th>Tax Amount</th>
+                <th>Actions</th>
+             </tr>
+          </thead>
+          <tbody>
+              <tr th:each="row : ${historylist}">
+                    <td th:text="${row.purchaseHistoryId}"></td>
+                    <td th:text="${row.dateOfPurchase}"></td>
+                    <td id="selectbrandname" th:text="${row.brandName}"></td>
+                    <td th:text="${row.quantity}"></td>
+                    <td th:text="${row.unitPrice}"></td>
+                    <td class="totalprice" th:text="${row.totalPrice}"></td>
+                    <td class="taxAmount" th:text="${row.taxAmount}"></td>
+                    <td>
+                       <a th:href="@{/ricemerchant/stocks/purchasehistory/print/{purchaseHistoryId}(purchaseHistoryId=${row.purchaseHistoryId})}"><span>Print</span></a>
+                    </td>
+              </tr>
+              <tr>
+                     <td class="nobackgroundcolor"></td>
+                     <td class="nobackgroundcolor"></td>
+                     <td class="nobackgroundcolor"></td>
+                     <td class="nobackgroundcolor"></td>
+                     <td>Total</td>
+                     <td id="grandtotalprice"></td>
+                     <td id="totalTaxAmount"></td>
+                     <td id="totalAmount"></td>
+              </tr>
+          </tbody>
+       </table>
+       <center>
+          <p id="noresults" style="color: red; font-size: 15px; padding-top: 20px;">--- No History ---</p>
+       </center>
+    </body>
+    <script th:inline="javascript">
+       var total = 0;
+       var taxAmount = 0;
+       window.onload = function() {
+               if(document.getElementById("historytable").rows.length > 2) {
+                    document.getElementById("noresults").innerHTML="-- End of results --";
+               }
+               else document.getElementById("historytable").style.visibility="hidden";
+               $('td').each(function(){
+                       if($(this).hasClass('totalprice')) total+= parseFloat($(this).text());
+               });
+               document.getElementById("grandtotalprice").innerText=total.toFixed(2);
+               $('td').each(function(){
+                       if($(this).hasClass('taxAmount')) taxAmount+= parseFloat($(this).text());
+               });
+               document.getElementById("totalTaxAmount").innerText=taxAmount.toFixed(2);
+               document.getElementById("totalAmount").innerText=(taxAmount+total).toFixed(2);    
+       }
+    </script>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>RiceMerchant</title>
+        <link rel="shortcut icon" type="image/png" th:href="@{/images/logo.png}"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <style>
+           #success, #error {
+		      visibility: hidden;
+		      min-width: 250px;
+		      margin-left: -125px;
+		      background-color: #333;
+		      color: #fff;
+		      text-align: center;
+		      border-radius: 5px;
+		      padding: 16px;
+		      position: fixed;
+		      z-index: 1;
+		      left: 50%;
+		      bottom: 30px;
+		      font-size: 17px;
+		   }
+		   #success.show, #error.show {
+		      visibility: visible;
+		      -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+		      animation: fadein 0.5s, fadeout 0.5s 2.5s;
+		   }
+		   @-webkit-keyframes fadein {
+		      from {
+		            bottom: 0;
+		            opacity: 0;
+		      } 
+		      to {
+		            bottom: 30px;
+		            opacity: 1;
+		      }
+		   }
+		   @keyframes fadein {
+		      from {
+		            bottom: 0;
+		            opacity: 0;
+		      } 
+		      to {
+		            bottom: 30px;
+		            opacity: 1;
+		      }
+		   }
+		   @-webkit-keyframes fadeout {
+		       from {
+		             bottom: 30px;
+		             opacity: 1;
+		       } 
+		       to {
+		             bottom: 0;
+		             opacity: 0;
+		       }
+		   }
+		   @keyframes fadeout {
+		       from {
+		             bottom: 30px;
+		             opacity: 1;
+		       }
+		       to {
+		             bottom: 0;
+		             opacity: 0;
+		       }
+		   }
+           form {
+              display: inline;
+              padding: 2px;
+           }
+           label {
+              font-size: 17px;
+           }
+           select, input[type="number"] {
+              width: 20%;
+           }
+           select, input[type="number"] {
+              font-size: 15px;
+              padding: 12px 20px;
+              margin: auto 1% 0 1%;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              box-sizing: border-box;
+           }
+           input::placeholder {
+              color: black;
+           }
+           option{
+              font-size: 20px;
+           }
+           hr {
+              border-top: 1px dashed orange;
+           }
+           form button, input[type="submit"] {
+              font-size: 15px;
+              background-color: #004d4d;
+              color: white;
+              padding: 12px 20px;
+              margin: auto 1% 0 1%;
+              border: none;
+              border-radius: 4px;
+              cursor: pointer;
+           }
+           input[type="submit"] {
+              float: right;
+              padding: 13px 25px 13px 25px;
+           }
+           button:hover, input[type="submit"]:hover {
+              background-color: blue;
+           }
+           input[type="submit"]:disabled{
+              border: 1px solid #999999;
+              background-color: #cccccc;
+              color: #666666;
+              cursor: auto;
+           }
+           table {
+              counter-reset: rowNumber;
+              width: 100%;
+              padding-top: 10px;
+           }
+           table tbody tr {
+              counter-increment: rowNumber;
+           }
+           table tbody tr td:first-child::before {
+              content: counter(rowNumber);
+              min-width: 1em;
+              margin-right: 0.5em;
+           }
+           tr:nth-child(odd){
+              background-color: #f2f2f2;
+           }  
+           tr:nth-child(even){
+              background-color: #c2adeb;
+           }           
+           th {
+              text-align: center;
+              padding: 12px;
+              background-color: #663399;
+              color: white;
+           }
+           td {
+              padding: 10px;
+              text-align: center;
+           }
+           td a {
+              color: blue;
+           }
+           td a:hover {
+              color: black;
+           }
+           td a span {
+              display: inline-block;
+           }
+           .nobackgroundcolor {
+              background-color: white;
+           }
+        </style>
+    </head>
+    <body>
+        <div th:replace="/Navigation Bar :: navigationbar"></div>
+        <div id="success" th:text="${success}"></div>
+        <div id="error" th:text="${error}"></div>
+        <form onsubmit="return onSubmit()" th:action="@{~/ricemerchant/stocks/customerpurchase/addtocart}" method="POST">
+           <center>
+               <select id="brandName" name="brandName" required>
+                    <option selected hidden>Select Brand name</option>
+                    <option th:each="row: ${brandlist}" th:text="${row}"></option>
+                </select>
+                <input id="quantity" name="quantity" type="number" th:value="${quantity}" min="1" placeholder="Quantity" required></input>
+                <input id="unitPrice" name="unitPrice" type="number" th:value="${unitPrice}" min="1" placeholder="Unit Price" required></input>
+                <button>Add</button><br>
+            </center>
+        </form>
+        <hr>
+        <input id="emptycart" value="Empty Cart" type="submit" onclick="emptyCart()" disabled/>
+        <input id="print" value="Print" type="submit" onclick="printPageTransfer()" disabled/>
+        <table id="carttable">
+          <thead>
+             <tr>
+                <th>S.No</th>
+                <th id="selectbrandname">Brand Name</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total Price</th>
+                <th>Tax Amount</th>
+                <th>Actions</th>
+             </tr>
+          </thead>
+          <tbody>
+              <tr th:each="row : ${cartlist}">
+                    <td></td>
+                    <td id="selectbrandname" th:text="${row.brandName}"></td>
+                    <td th:text="${row.quantity}"></td>
+                    <td th:text="${row.unitPrice}"></td>
+                    <td class="totalprice" th:text="${row.totalPrice}"></td>
+                    <td class="taxAmount" th:text="${row.taxAmount}"></td>
+                    <td>
+                       <a th:href="@{/ricemerchant/stocks/customerpurchase/deletefromcart/{cartId}(cartId=${row.cartId})}"><span>Delete</span></a>  
+                    </td>
+              </tr>
+              <tr>
+                     <td class="nobackgroundcolor" style="display: none;"></td>
+                     <td class="nobackgroundcolor"></td>
+                     <td class="nobackgroundcolor"></td>
+                     <td class="nobackgroundcolor"></td>
+                     <td>Total</td>
+                     <td id="grandtotalprice"></td>
+                     <td id="totalTaxAmount"></td>
+                     <td id="netTotal"></td>
+              </tr>
+          </tbody>
+       </table>
+       <center>
+          <p id="noresults" style="color: red; font-size: 15px; padding-top: 20px;">--- Cart Empty ---</p>
+       </center>
+    </body>
+    <script th:inline="javascript">
+       var total = 0.00;
+       var taxTotal = 0.00;
+       var netTotal = 0.00;
+       window.onload = function() {
+           if(/*[[${success}]]*/ != null) {
+	           var x = document.getElementById("success");
+	           x.className = "show";
+	           setTimeout(function(){
+	                x.className = x.className.replace("show", "");
+	           }, 3000);
+	       }
+	       if(/*[[${error}]]*/ != null) {
+	           var x = document.getElementById("error");
+	           x.className = "show";
+	           setTimeout(function(){
+	                x.className = x.className.replace("show", "");
+	           }, 3000);
+	       }
+           if(document.getElementById("carttable").rows.length > 2) {
+                document.getElementById("print").removeAttribute("disabled");
+                document.getElementById("emptycart").removeAttribute("disabled");
+                document.getElementById("noresults").innerHTML="-- End of results --";
+           }
+           else document.getElementById("carttable").style.visibility="hidden";
+           $('td').each(function(){
+                if($(this).hasClass('totalprice'))
+                   total+= parseFloat($(this).text());
+           });
+           document.getElementById("grandtotalprice").innerText=total.toFixed(2);
+           $('td').each(function(){
+                if($(this).hasClass('taxAmount'))
+                   taxTotal+= parseFloat($(this).text());
+           });
+           document.getElementById("totalTaxAmount").innerText=taxTotal.toFixed(2);
+           netTotal=total+taxTotal;
+           document.getElementById("netTotal").innerText=netTotal.toFixed(2);
+       }
+       
+       function printPageTransfer() {
+       	   window.location.href=window.location.protocol+"//"+window.location.host+"/ricemerchant/stocks/customerpurchase/print";
+       }
+       
+       function emptyCart() {
+           window.location.href=window.location.protocol+"//"+window.location.host+"/ricemerchant/stocks/customerpurchase/emptycart/false";
+       }
+    </script>
+</html>

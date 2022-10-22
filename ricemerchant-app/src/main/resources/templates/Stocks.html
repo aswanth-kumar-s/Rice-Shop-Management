@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>RiceMerchant</title>
+        <link rel="shortcut icon" type="image/png" th:href="@{/images/logo.png}"/>
+        <style>
+           table {
+              padding-top: 10px;
+              counter-reset: rowNumber;
+              width: 100%;
+              table-layout: fixed;
+           }
+           table tbody tr {
+              counter-increment: rowNumber;
+           }
+           table tbody tr td:first-child::before {
+              content: counter(rowNumber);
+              min-width: 1em;
+              margin-right: 0.5em;
+           }
+           th {
+              text-align: center;
+              padding: 12px;
+              background-color: #663399;
+              color: white;
+           }
+           td {
+              padding: 10px;
+              text-align: center;              
+           }
+           tr:nth-child(odd){
+              background-color: #f2f2f2;
+           }  
+           tr:nth-child(even){
+              background-color: #c2adeb;
+           }
+           td a {
+              color: blue;
+           }
+           td a:hover {
+              color: black;
+           }
+           td a span {
+              display: inline-block;
+           }
+        </style>
+    </head>
+    <body>
+        <div th:replace="/Navigation Bar :: navigationbar"></div>
+        <table id="stockstable">
+          <thead>
+             <tr>
+                <th>S.No</th>
+                <th>Brand Name</th>
+                <th>Stock</th>
+             </tr>
+          </thead>
+          <tbody>
+              <tr th:each="row : ${stockslist}">
+                <td></td>
+                <td th:text="${row.brandName}"></td>
+                <td th:text="${row.stocks}"></td>
+              </tr>
+          </tbody>
+       </table>
+       <center>
+          <p id="noresults" style="color: red; font-size: 15px;">--- No Data ---</p>
+       </center>
+    </body>
+    <script th:inline="javascript">
+       window.onload = function() {
+           if(document.getElementById("stockstable").rows.length > 1) document.getElementById("noresults").innerHTML="-- End of results --";
+           else document.getElementById("stockstable").style.visibility="hidden";
+       }
+    </script>
+</html>
